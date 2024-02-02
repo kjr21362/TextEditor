@@ -1,12 +1,14 @@
-package com.kjr21362.text_editor;
+package com.kjianxin.texteditor;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
+/**
+ * HelloApplication. To add more details.
+ */
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {

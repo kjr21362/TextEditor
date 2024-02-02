@@ -1,8 +1,11 @@
-package com.kjr21362.text_editor;
+package com.kjianxin.texteditor;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
+/**
+ * HelloController. To add more details.
+ */
 public class HelloController {
     @FXML
     private Label welcomeText;
