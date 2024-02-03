@@ -3,6 +3,8 @@ package com.kjianxin.texteditor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -17,6 +19,8 @@ public class TextEditorController {
     @FXML
     private TextArea textArea;
 
+    private File openedFile;
+
     /**
      * Open a file in the background and show the content in the text area.
      * @param event
@@ -27,9 +31,31 @@ public class TextEditorController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
-        File fileToOpen = fileChooser.showOpenDialog(null);
-        if (fileToOpen != null) {
-            loadFile(fileToOpen);
+        openedFile = fileChooser.showOpenDialog(null);
+        if (openedFile != null) {
+            loadFile(openedFile);
+        }
+    }
+
+    /**
+     * Save content in the text area to file.
+     * @param event
+     */
+    @FXML
+    public void saveFile(ActionEvent event) {
+        if (openedFile == null) {
+            // Save to a new file
+            FileChooser fileChooser = new FileChooser();
+            openedFile = fileChooser.showSaveDialog(null);
+        }
+        if (openedFile != null) {
+            try {
+                FileWriter fileWriter = new FileWriter(openedFile);
+                fileWriter.write(textArea.getText());
+                fileWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException("Error saving file.", e);
+            }
         }
     }
 
