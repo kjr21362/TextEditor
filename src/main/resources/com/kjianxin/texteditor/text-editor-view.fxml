@@ -8,7 +8,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="539.0" prefWidth="839.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kjianxin.texteditor.HelloController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="539.0" prefWidth="839.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kjianxin.texteditor.TextEditorController">
    <left>
       <ListView prefHeight="486.0" prefWidth="139.0" BorderPane.alignment="CENTER" />
    </left>
@@ -16,7 +16,7 @@
       <TextArea fx:id="textArea" prefHeight="200.0" prefWidth="200.0" stylesheets="@textarea.css" wrapText="true" BorderPane.alignment="CENTER" />
    </center>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar useSystemMenuBar="true" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>

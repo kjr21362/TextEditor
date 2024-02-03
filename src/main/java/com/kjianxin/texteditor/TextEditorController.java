@@ -11,9 +11,9 @@ import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 
 /**
- * HelloController. To add more details.
+ * TextEditorController. To add more details.
  */
-public class HelloController {
+public class TextEditorController {
     @FXML
     private TextArea textArea;
 
@@ -58,12 +58,12 @@ public class HelloController {
             try {
                 textArea.setText(task.get());
             } catch (InterruptedException | ExecutionException e) {
-                textArea.setText("Could not open file: " + fileToOpen.getAbsolutePath());
-                throw new RuntimeException(e);
+                textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
+                throw new RuntimeException("Error opening file.", e);
             }
         });
         task.setOnFailed(workerStateEvent -> {
-            textArea.setText("Could not open file: " + fileToOpen.getAbsolutePath());
+            textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
         });
         return task;
     }
