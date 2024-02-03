@@ -14,7 +14,9 @@ public class TextEditorApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
-        stage.setTitle("Hello!");
+        ((TextEditorController) fxmlLoader.getController()).setStage(stage);
+
+        stage.setTitle("untitled");
         stage.setScene(scene);
         stage.show();
     }

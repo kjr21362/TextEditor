@@ -11,6 +11,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * TextEditorController. To add more details.
@@ -19,7 +22,12 @@ public class TextEditorController {
     @FXML
     private TextArea textArea;
 
+    @Getter
     private File openedFile;
+
+    @Setter
+    @Getter
+    private Stage stage;
 
     /**
      * Open a file in the background and show the content in the text area.
@@ -50,6 +58,8 @@ public class TextEditorController {
         }
         if (openedFile != null) {
             try {
+                setStageTitle(openedFile);
+
                 FileWriter fileWriter = new FileWriter(openedFile);
                 fileWriter.write(textArea.getText());
                 fileWriter.close();
@@ -83,6 +93,7 @@ public class TextEditorController {
         task.setOnSucceeded(workerStateEvent -> {
             try {
                 textArea.setText(task.get());
+                setStageTitle(fileToOpen);
             } catch (InterruptedException | ExecutionException e) {
                 textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
                 throw new RuntimeException("Error opening file.", e);
@@ -92,5 +103,13 @@ public class TextEditorController {
             textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
         });
         return task;
+    }
+
+    /**
+     * Sets stage title to be the opened file name.
+     * @param openedFile file name.
+     */
+    private void setStageTitle(File openedFile) {
+        stage.setTitle(openedFile.getName());
     }
 }
