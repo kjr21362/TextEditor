@@ -1,4 +1,4 @@
-module com.kjr21362.text_editor {
+module com.kjianxin.text_editor {
     requires javafx.controls;
     requires javafx.fxml;
 
