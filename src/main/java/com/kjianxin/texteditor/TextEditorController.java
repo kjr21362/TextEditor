@@ -5,13 +5,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ExecutionException;
+import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,9 +34,12 @@ public class TextEditorController {
     @Getter
     private Stage stage;
 
+    private FileTime lastModifiedTime;
+
     /**
      * Open a file in the background and show the content in the text area.
-     * @param event
+     *
+     * @param event event.
      */
     @FXML
     public void openFile(ActionEvent event) {
@@ -47,7 +55,8 @@ public class TextEditorController {
 
     /**
      * Save content in the text area to file.
-     * @param event
+     *
+     * @param event event.
      */
     @FXML
     public void saveFile(ActionEvent event) {
@@ -94,22 +103,60 @@ public class TextEditorController {
             try {
                 textArea.setText(task.get());
                 setStageTitle(fileToOpen);
-            } catch (InterruptedException | ExecutionException e) {
+                openedFile = fileToOpen;
+
+                lastModifiedTime = getFileLastModifiedTime(fileToOpen);
+                scheduleFileModifiedCheck(openedFile);
+            } catch (InterruptedException | ExecutionException | IOException e) {
                 textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
                 throw new RuntimeException("Error opening file.", e);
             }
         });
+
         task.setOnFailed(workerStateEvent -> {
             textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
         });
         return task;
     }
 
-    /**
-     * Sets stage title to be the opened file name.
-     * @param openedFile file name.
-     */
+    private static FileTime getFileLastModifiedTime(File fileToOpen) throws IOException {
+        return Files.readAttributes(fileToOpen.toPath(), BasicFileAttributes.class)
+            .lastModifiedTime();
+    }
+
     private void setStageTitle(File openedFile) {
         stage.setTitle(openedFile.getName());
+    }
+
+    private ScheduledService<Boolean> createFileModifiedCheckService(File file) {
+        ScheduledService<Boolean> scheduledService = new ScheduledService<Boolean>() {
+            @Override
+            protected Task<Boolean> createTask() {
+                return new Task<Boolean>() {
+                    @Override
+                    protected Boolean call() throws Exception {
+                        FileTime lastModifiedNow = getFileLastModifiedTime(file);
+                        return lastModifiedNow.compareTo(lastModifiedTime) > 0;
+                    }
+                };
+            }
+        };
+        scheduledService.setPeriod(Duration.seconds(2));
+        return scheduledService;
+    }
+
+    private void scheduleFileModifiedCheck(File file) {
+        ScheduledService<Boolean> scheduledService = createFileModifiedCheckService(file);
+        scheduledService.setOnSucceeded(workerStateEvent -> {
+            if (scheduledService.getLastValue() == null) {
+                return;
+            }
+            if (scheduledService.getLastValue()) {
+                scheduledService.cancel();
+                // notify change
+                loadFile(file);
+            }
+        });
+        scheduledService.start();
     }
 }
