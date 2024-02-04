@@ -29,7 +29,7 @@ public class TextEditorController {
     @Setter
     private TextArea textArea;
 
-    private String prevTextAreaStr;
+    private String prevTextAreaStr = "";
 
     @Getter
     private File openedFile;
@@ -80,6 +80,7 @@ public class TextEditorController {
                 FileWriter fileWriter = new FileWriter(openedFile);
                 fileWriter.write(textArea.getText());
                 prevTextAreaStr = textArea.getText();
+                lastModifiedTime = getFileLastModifiedTime(openedFile);
                 fileWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException("Error saving file.", e);
@@ -140,7 +141,7 @@ public class TextEditorController {
 
     public boolean isFileModified() {
         if (openedFile == null) {
-            return true;
+            return false;
         }
 
         FileTime lastModifiedNow = getFileLastModifiedTime(openedFile);
@@ -161,7 +162,7 @@ public class TextEditorController {
             protected Task<Boolean> createTask() {
                 return new Task<>() {
                     @Override
-                    protected Boolean call() throws Exception {
+                    protected Boolean call() {
                         return isFileModified();
                     }
                 };
