@@ -102,9 +102,10 @@ public class TextEditorController {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     fileContent.append(line);
-                    fileContent.append("\n");
+                    fileContent.append(System.lineSeparator());
                 }
 
+                bufferedReader.close();
                 return fileContent.toString();
             }
         };
