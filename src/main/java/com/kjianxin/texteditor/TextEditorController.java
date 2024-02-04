@@ -25,7 +25,11 @@ import lombok.Setter;
  */
 public class TextEditorController {
     @FXML
+    @Getter
+    @Setter
     private TextArea textArea;
+
+    private String prevTextAreaStr;
 
     @Getter
     private File openedFile;
@@ -60,6 +64,10 @@ public class TextEditorController {
      */
     @FXML
     public void saveFile(ActionEvent event) {
+        saveToFile();
+    }
+
+    public void saveToFile() {
         if (openedFile == null) {
             // Save to a new file
             FileChooser fileChooser = new FileChooser();
@@ -71,6 +79,7 @@ public class TextEditorController {
 
                 FileWriter fileWriter = new FileWriter(openedFile);
                 fileWriter.write(textArea.getText());
+                prevTextAreaStr = textArea.getText();
                 fileWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException("Error saving file.", e);
@@ -102,12 +111,13 @@ public class TextEditorController {
         task.setOnSucceeded(workerStateEvent -> {
             try {
                 textArea.setText(task.get());
+                prevTextAreaStr = textArea.getText();
                 setStageTitle(fileToOpen);
                 openedFile = fileToOpen;
 
                 lastModifiedTime = getFileLastModifiedTime(fileToOpen);
                 scheduleFileModifiedCheck(openedFile);
-            } catch (InterruptedException | ExecutionException | IOException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
                 throw new RuntimeException("Error opening file.", e);
             }
@@ -119,9 +129,26 @@ public class TextEditorController {
         return task;
     }
 
-    private static FileTime getFileLastModifiedTime(File fileToOpen) throws IOException {
-        return Files.readAttributes(fileToOpen.toPath(), BasicFileAttributes.class)
-            .lastModifiedTime();
+    private static FileTime getFileLastModifiedTime(File fileToOpen) {
+        try {
+            return Files.readAttributes(fileToOpen.toPath(), BasicFileAttributes.class)
+                .lastModifiedTime();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isFileModified() {
+        if (openedFile == null) {
+            return true;
+        }
+
+        FileTime lastModifiedNow = getFileLastModifiedTime(openedFile);
+        return lastModifiedNow.compareTo(lastModifiedTime) > 0;
+    }
+
+    public boolean isFileEdited() {
+        return !prevTextAreaStr.equals(textArea.getText());
     }
 
     private void setStageTitle(File openedFile) {
@@ -129,14 +156,13 @@ public class TextEditorController {
     }
 
     private ScheduledService<Boolean> createFileModifiedCheckService(File file) {
-        ScheduledService<Boolean> scheduledService = new ScheduledService<Boolean>() {
+        ScheduledService<Boolean> scheduledService = new ScheduledService<>() {
             @Override
             protected Task<Boolean> createTask() {
-                return new Task<Boolean>() {
+                return new Task<>() {
                     @Override
                     protected Boolean call() throws Exception {
-                        FileTime lastModifiedNow = getFileLastModifiedTime(file);
-                        return lastModifiedNow.compareTo(lastModifiedTime) > 0;
+                        return isFileModified();
                     }
                 };
             }
