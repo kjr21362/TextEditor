@@ -1,3 +1,12 @@
 .text-area {
   -fx-control-inner-background: #303841;
 }
+
+.split-pane *.split-pane-divider {
+   -fx-background-color: transparent;
+   -fx-padding: 0;
+}
+
+VBox {
+  -fx-background-color: #303841;
+}

@@ -13,7 +13,11 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -28,6 +32,9 @@ public class TextEditorController {
     @Getter
     @Setter
     private TextArea textArea;
+
+    @FXML
+    private VBox lineNumberCol;
 
     private String prevTextAreaStr = "";
 
@@ -81,6 +88,10 @@ public class TextEditorController {
                 fileWriter.write(textArea.getText());
                 prevTextAreaStr = textArea.getText();
                 lastModifiedTime = getFileLastModifiedTime(openedFile);
+
+                int nLines = textArea.getText().split(System.lineSeparator(), -1).length;
+                generateLineNumberCol(nLines);
+
                 fileWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException("Error saving file.", e);
@@ -99,23 +110,25 @@ public class TextEditorController {
             protected String call() throws Exception {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToOpen));
                 StringBuilder fileContent = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    fileContent.append(line);
-                    fileContent.append(System.lineSeparator());
+                int c;
+                while ((c = bufferedReader.read()) != -1) {
+                    fileContent.append((char) c);
                 }
-
-                bufferedReader.close();
                 return fileContent.toString();
             }
         };
 
         task.setOnSucceeded(workerStateEvent -> {
+            System.out.println("fileLoaderTask succeeded");
             try {
                 textArea.setText(task.get());
                 prevTextAreaStr = textArea.getText();
+
                 setStageTitle(fileToOpen);
                 openedFile = fileToOpen;
+
+                int nLines = textArea.getText().split(System.lineSeparator(), -1).length;
+                generateLineNumberCol(nLines);
 
                 lastModifiedTime = getFileLastModifiedTime(fileToOpen);
                 scheduleFileModifiedCheck(openedFile);
@@ -129,6 +142,27 @@ public class TextEditorController {
             textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
         });
         return task;
+    }
+
+    public void initLineNumberCol() {
+        lineNumberCol.setPadding(new Insets(5, 1, 0, 1));
+        lineNumberCol.getChildren().clear();
+        Label label = new Label("1");
+        label.setTextFill(Color.WHITE);
+        lineNumberCol.getChildren().add(label);
+    }
+
+    public void generateLineNumberCol(int nLines) {
+        // TODO: handle when warp text is enabled
+
+        //int nLines = lines.size();
+        lineNumberCol.setPadding(new Insets(5, 5, 0, 5));
+        lineNumberCol.getChildren().clear();
+        for (int l=1; l <= nLines+1; l++) {
+            Label label = new Label(String.valueOf(l));
+            label.setTextFill(Color.WHITE);
+            lineNumberCol.getChildren().add(label);
+        }
     }
 
     private static FileTime getFileLastModifiedTime(File fileToOpen) {

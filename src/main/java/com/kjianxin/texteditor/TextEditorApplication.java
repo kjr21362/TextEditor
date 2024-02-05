@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 /**
@@ -22,6 +23,7 @@ public class TextEditorApplication extends Application {
             textEditorController = fxmlLoader.getController();
         }
         textEditorController.setStage(stage);
+        textEditorController.initLineNumberCol();
 
         stage.setTitle("untitled");
         stage.setScene(scene);
@@ -47,6 +49,14 @@ public class TextEditorApplication extends Application {
                 }
             }
 
+        });
+
+        textEditorController.getTextArea().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.BACK_SPACE) {
+                //System.out.println("keyCode enter|back_space");
+                int nLines = textEditorController.getTextArea().getText().split(System.lineSeparator(), -1).length;
+                textEditorController.generateLineNumberCol(nLines);
+            }
         });
     }
 
