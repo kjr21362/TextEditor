@@ -15,9 +15,11 @@ import javafx.stage.Stage;
  */
 public class TextEditorApplication extends Application {
     TextEditorController textEditorController;
+
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
+        FXMLLoader fxmlLoader =
+            new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
         if (textEditorController == null) {
             textEditorController = fxmlLoader.getController();
@@ -54,8 +56,9 @@ public class TextEditorApplication extends Application {
         textEditorController.getTextArea().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.BACK_SPACE) {
                 //System.out.println("keyCode enter|back_space");
-                int nLines = textEditorController.getTextArea().getText().split(System.lineSeparator(), -1).length;
-                textEditorController.generateLineNumberCol(nLines);
+                int totalLines = textEditorController.getTextArea().getText()
+                    .split(System.lineSeparator(), -1).length;
+                textEditorController.generateLineNumberCol(totalLines);
             }
         });
     }

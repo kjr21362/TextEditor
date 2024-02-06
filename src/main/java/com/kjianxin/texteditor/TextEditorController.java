@@ -55,7 +55,8 @@ public class TextEditorController {
     @FXML
     public void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
+        fileChooser.getExtensionFilters()
+            .add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
         openedFile = fileChooser.showOpenDialog(null);
@@ -65,7 +66,7 @@ public class TextEditorController {
     }
 
     /**
-     * Save content in the text area to file.
+     * Save File action.
      *
      * @param event event.
      */
@@ -74,6 +75,9 @@ public class TextEditorController {
         saveToFile();
     }
 
+    /**
+     * Save content in the text area to file.
+     */
     public void saveToFile() {
         if (openedFile == null) {
             // Save to a new file
@@ -89,8 +93,8 @@ public class TextEditorController {
                 prevTextAreaStr = textArea.getText();
                 lastModifiedTime = getFileLastModifiedTime(openedFile);
 
-                int nLines = textArea.getText().split(System.lineSeparator(), -1).length;
-                generateLineNumberCol(nLines);
+                int totalLines = textArea.getText().split(System.lineSeparator(), -1).length;
+                generateLineNumberCol(totalLines);
 
                 fileWriter.close();
             } catch (IOException e) {
@@ -127,8 +131,8 @@ public class TextEditorController {
                 setStageTitle(fileToOpen);
                 openedFile = fileToOpen;
 
-                int nLines = textArea.getText().split(System.lineSeparator(), -1).length;
-                generateLineNumberCol(nLines);
+                int totalLines = textArea.getText().split(System.lineSeparator(), -1).length;
+                generateLineNumberCol(totalLines);
 
                 lastModifiedTime = getFileLastModifiedTime(fileToOpen);
                 scheduleFileModifiedCheck(openedFile);
@@ -144,6 +148,9 @@ public class TextEditorController {
         return task;
     }
 
+    /**
+     * Initialize line number columns.
+     */
     public void initLineNumberCol() {
         lineNumberCol.setPadding(new Insets(5, 1, 0, 1));
         lineNumberCol.getChildren().clear();
@@ -152,13 +159,18 @@ public class TextEditorController {
         lineNumberCol.getChildren().add(label);
     }
 
-    public void generateLineNumberCol(int nLines) {
+    /**
+     * Updates line number columns based on the total number of lines.
+     *
+     * @param totalLines total number of lines.
+     */
+    public void generateLineNumberCol(int totalLines) {
         // TODO: handle when warp text is enabled
 
         //int nLines = lines.size();
         lineNumberCol.setPadding(new Insets(5, 5, 0, 5));
         lineNumberCol.getChildren().clear();
-        for (int l=1; l <= nLines+1; l++) {
+        for (int l = 1; l <= totalLines + 1; l++) {
             Label label = new Label(String.valueOf(l));
             label.setTextFill(Color.WHITE);
             lineNumberCol.getChildren().add(label);
@@ -174,6 +186,11 @@ public class TextEditorController {
         }
     }
 
+    /**
+     * Check if the file is modified based on its last modified time.
+     *
+     * @return true if it's modified, otherwise false.
+     */
     public boolean isFileModified() {
         if (openedFile == null) {
             return false;
