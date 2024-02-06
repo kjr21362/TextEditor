@@ -15,7 +15,7 @@
       <SplitPane dividerPositions="0.7307692307692307" stylesheets="@textarea.css" BorderPane.alignment="TOP_CENTER">
          <items>
             <ListView prefHeight="486.0" prefWidth="139.0" />
-            <VBox fx:id="lineNumberCol" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="547.0" prefWidth="49.0" />
+            <VBox id="lineNumberCol" fx:id="lineNumberCol" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="547.0" prefWidth="49.0" />
          </items>
       </SplitPane>
    </left>

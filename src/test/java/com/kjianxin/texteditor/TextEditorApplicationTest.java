@@ -1,32 +1,37 @@
 package com.kjianxin.texteditor;
 
-import java.io.IOException;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
+import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.testfx.framework.junit5.ApplicationTest;
 
-@ExtendWith(ApplicationExtension.class)
-class TextEditorApplicationTest {
+@ExtendWith({ApplicationExtension.class})
+class TextEditorApplicationTest extends ApplicationTest {
 
-    @Start
-    private void start(Stage stage) throws IOException {
-        System.out.println("start");
-        FXMLLoader fxmlLoader =
-            new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
+    TextEditorApplication textEditorApplication;
 
-        stage.setScene(scene);
-        stage.show();
+    @Override
+    public void start(Stage stage) throws Exception {
+        textEditorApplication = new TextEditorApplication();
+        textEditorApplication.start(stage);
     }
 
     @Test
-    void test(FxRobot robot) {
-        System.out.println("test");
+    void testInitLineNumberColWhenStart(FxRobot robot) {
+        // lookup is based on css id, not fx id
+        VBox lineNumberCol = lookup("#lineNumberCol").queryAs(VBox.class);
+        Assertions.assertThat(lineNumberCol.getChildren().size() == 1);
+
+        Label label = (Label) lineNumberCol.getChildren().get(0);
+        Assertions.assertThat(label.getTextFill().equals(Color.WHITE));
+        Assertions.assertThat(label.getText().equals("1"));
+
     }
 
     @Test
