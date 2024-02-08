@@ -1,5 +1,17 @@
-.text-area {
-  -fx-control-inner-background: #303841;
+.styled-text-area {
+    -fx-background-color: #303841;
+}
+
+.styled-text-area .text {
+    -fx-fill: white;
+}
+
+.caret {
+    -fx-stroke: white;
+}
+
+.lineno {
+    -fx-background-color: #303841;
 }
 
 .split-pane *.split-pane-divider {

@@ -1,28 +1,26 @@
 package com.kjianxin.texteditor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.Getter;
 import lombok.Setter;
+import org.fxmisc.richtext.CodeArea;
 
 /**
  * TextEditorController. To add more details.
@@ -31,12 +29,18 @@ public class TextEditorController {
     @FXML
     @Getter
     @Setter
-    private TextArea textArea;
+    private CodeArea textArea;
 
     @FXML
-    private VBox lineNumberCol;
+    @Getter
+    @Setter
+    private TextField searchText;
+
+    private int lastMatch = -1;
 
     private String prevTextAreaStr = "";
+
+    private List<String> content = List.of();
 
     @Getter
     private File openedFile;
@@ -63,6 +67,37 @@ public class TextEditorController {
         if (openedFile != null) {
             loadFile(openedFile);
         }
+    }
+
+    @FXML
+    public void findInFile(ActionEvent event) {
+        findText(searchText.getText());
+
+    }
+
+    public void findText(String text) {
+        if (text.isEmpty()) {
+            return;
+        }
+        System.out.println("findText: " + text);
+        System.out.println(textArea.getCursor());
+
+        for (int i = 0; i < content.size(); i++) {
+            String line = content.get(i);
+            int match = line.indexOf(text);
+            if (match != -1) {
+
+            }
+        }
+    }
+
+    private int calculateCaretPos(int row, int col) {
+        int pos = -1;
+        for (int i = 0; i < row; i++) {
+            pos += content.get(row).length();
+        }
+        pos += col;
+        return pos < 0 ? 0 : pos;
     }
 
     /**
@@ -93,9 +128,6 @@ public class TextEditorController {
                 prevTextAreaStr = textArea.getText();
                 lastModifiedTime = getFileLastModifiedTime(openedFile);
 
-                int totalLines = textArea.getText().split(System.lineSeparator(), -1).length;
-                generateLineNumberCol(totalLines);
-
                 fileWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException("Error saving file.", e);
@@ -104,77 +136,55 @@ public class TextEditorController {
     }
 
     private void loadFile(File fileToOpen) {
-        Task<String> loadFileTask = fileLoaderTask(fileToOpen);
+        Task<List<String>> loadFileTask = fileLoaderTask(fileToOpen);
         loadFileTask.run();
     }
 
-    private Task<String> fileLoaderTask(File fileToOpen) {
-        Task<String> task = new Task<>() {
+    private Task<List<String>> fileLoaderTask(File fileToOpen) {
+        Task<List<String>> task = new Task<>() {
             @Override
-            protected String call() throws Exception {
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToOpen));
+            protected List<String> call() throws Exception {
+                /*BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToOpen));
                 StringBuilder fileContent = new StringBuilder();
                 int c;
                 while ((c = bufferedReader.read()) != -1) {
                     fileContent.append((char) c);
                 }
-                return fileContent.toString();
+                return fileContent.toString();*/
+                Path path = fileToOpen.toPath();
+                if (Files.exists(path)) {
+                    try (Stream<String> stream = Files.lines(path)) {
+                        content = stream.collect(Collectors.toList());
+                    } catch (IOException e) {
+
+                    }
+                }
+                return content;
             }
         };
 
         task.setOnSucceeded(workerStateEvent -> {
             System.out.println("fileLoaderTask succeeded");
-            try {
-                textArea.setText(task.get());
-                prevTextAreaStr = textArea.getText();
-
-                setStageTitle(fileToOpen);
-                openedFile = fileToOpen;
-
-                int totalLines = textArea.getText().split(System.lineSeparator(), -1).length;
-                generateLineNumberCol(totalLines);
-
-                lastModifiedTime = getFileLastModifiedTime(fileToOpen);
-                scheduleFileModifiedCheck(openedFile);
-            } catch (InterruptedException | ExecutionException e) {
-                textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
-                throw new RuntimeException("Error opening file.", e);
+            //textArea.setText(task.get());
+            textArea.clear();
+            for (int i = 0; i < content.size(); i++) {
+                textArea.appendText(content.get(i));
+                textArea.appendText(System.lineSeparator());
             }
+
+            prevTextAreaStr = textArea.getText();
+
+            setStageTitle(fileToOpen);
+            openedFile = fileToOpen;
+
+            lastModifiedTime = getFileLastModifiedTime(fileToOpen);
+            scheduleFileModifiedCheck(openedFile);
         });
 
         task.setOnFailed(workerStateEvent -> {
-            textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
+            //textArea.setText("Error opening file: " + fileToOpen.getAbsolutePath());
         });
         return task;
-    }
-
-    /**
-     * Initialize line number columns.
-     */
-    public void initLineNumberCol() {
-        lineNumberCol.setPadding(new Insets(5, 1, 0, 1));
-        lineNumberCol.getChildren().clear();
-        Label label = new Label("1");
-        label.setTextFill(Color.WHITE);
-        lineNumberCol.getChildren().add(label);
-    }
-
-    /**
-     * Updates line number columns based on the total number of lines.
-     *
-     * @param totalLines total number of lines.
-     */
-    public void generateLineNumberCol(int totalLines) {
-        // TODO: handle when warp text is enabled
-
-        //int nLines = lines.size();
-        lineNumberCol.setPadding(new Insets(5, 5, 0, 5));
-        lineNumberCol.getChildren().clear();
-        for (int l = 1; l <= totalLines + 1; l++) {
-            Label label = new Label(String.valueOf(l));
-            label.setTextFill(Color.WHITE);
-            lineNumberCol.getChildren().add(label);
-        }
     }
 
     private static FileTime getFileLastModifiedTime(File fileToOpen) {

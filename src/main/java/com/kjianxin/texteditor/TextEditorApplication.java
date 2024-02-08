@@ -1,14 +1,13 @@
 package com.kjianxin.texteditor;
 
-import java.io.IOException;
 import java.util.Optional;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import org.fxmisc.richtext.LineNumberFactory;
 
 /**
  * TextEditorApplication. To add more details.
@@ -17,15 +16,17 @@ public class TextEditorApplication extends Application {
     TextEditorController textEditorController;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws Exception {
+
         FXMLLoader fxmlLoader =
             new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
+        scene.getStylesheets().add(TextEditorApplication.class.getResource("textarea.css").toExternalForm());
         if (textEditorController == null) {
             textEditorController = fxmlLoader.getController();
         }
         textEditorController.setStage(stage);
-        textEditorController.initLineNumberCol();
+        textEditorController.getTextArea().setParagraphGraphicFactory(LineNumberFactory.get(textEditorController.getTextArea()));
 
         stage.setTitle("untitled");
         stage.setScene(scene);
@@ -53,13 +54,8 @@ public class TextEditorApplication extends Application {
 
         });
 
-        textEditorController.getTextArea().setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.BACK_SPACE) {
-                //System.out.println("keyCode enter|back_space");
-                int totalLines = textEditorController.getTextArea().getText()
-                    .split(System.lineSeparator(), -1).length;
-                textEditorController.generateLineNumberCol(totalLines);
-            }
+        textEditorController.getSearchText().setOnKeyTyped(e -> {
+            textEditorController.findText(textEditorController.getSearchText().getText());
         });
     }
 

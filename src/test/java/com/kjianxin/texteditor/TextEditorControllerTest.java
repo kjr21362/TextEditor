@@ -1,6 +1,5 @@
 package com.kjianxin.texteditor;
 
-import java.io.IOException;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
@@ -13,7 +12,7 @@ class TextEditorControllerTest extends ApplicationTest {
     TextEditorController textEditorController;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws Exception {
         textEditorApplication = new TextEditorApplication();
         textEditorApplication.start(stage);
         textEditorController = textEditorApplication.textEditorController;
