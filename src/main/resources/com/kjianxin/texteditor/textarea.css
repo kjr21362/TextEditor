@@ -6,6 +6,15 @@
     -fx-fill: white;
 }
 
+.styled-text-area .highlight {
+    -rtfx-background-color: yellow;
+    -fx-fill: black;
+}
+
+.styled-text-area .normal {
+    -rtfx-background-color: #303841;
+}
+
 .caret {
     -fx-stroke: white;
 }

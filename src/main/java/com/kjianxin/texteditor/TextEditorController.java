@@ -7,7 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.concurrent.ScheduledService;
@@ -36,7 +39,11 @@ public class TextEditorController {
     @Setter
     private TextField searchText;
 
-    private int lastMatch = -1;
+    private int lastMatchIdx = -1;
+
+    Pattern pattern;
+    Matcher matcher;
+    private String prevSearchText;
 
     private String prevTextAreaStr = "";
 
@@ -76,28 +83,29 @@ public class TextEditorController {
     }
 
     public void findText(String text) {
+        if (lastMatchIdx != -1) {
+            textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("normal"));
+        }
         if (text.isEmpty()) {
             return;
         }
-        System.out.println("findText: " + text);
-        System.out.println(textArea.getCursor());
 
-        for (int i = 0; i < content.size(); i++) {
-            String line = content.get(i);
-            int match = line.indexOf(text);
-            if (match != -1) {
-
-            }
+        //System.out.println("findText: " + text);
+        if (pattern == null || (!text.equals(prevSearchText))) {
+            lastMatchIdx = -1;
+            pattern = Pattern.compile(text, Pattern.LITERAL);
         }
-    }
+        matcher = pattern.matcher(textArea.getText());
 
-    private int calculateCaretPos(int row, int col) {
-        int pos = -1;
-        for (int i = 0; i < row; i++) {
-            pos += content.get(row).length();
+        if (matcher.find(lastMatchIdx + 1) || matcher.find()) {
+            lastMatchIdx = matcher.start();
+            prevSearchText = text;
+            textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("highlight"));
+        } else {
+            pattern = null;
+            lastMatchIdx = -1;
+            prevSearchText = "";
         }
-        pos += col;
-        return pos < 0 ? 0 : pos;
     }
 
     /**

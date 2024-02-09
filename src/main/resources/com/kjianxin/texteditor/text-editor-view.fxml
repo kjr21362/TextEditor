@@ -13,7 +13,7 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kjianxin.texteditor.TextEditorController">
    <left>
-      <SplitPane stylesheets="@textarea.css" BorderPane.alignment="TOP_CENTER">
+      <SplitPane BorderPane.alignment="TOP_CENTER">
          <items>
             <ListView prefHeight="486.0" prefWidth="139.0" />
          </items>
