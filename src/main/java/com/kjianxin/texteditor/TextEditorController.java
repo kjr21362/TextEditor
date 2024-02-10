@@ -101,6 +101,9 @@ public class TextEditorController {
             lastMatchIdx = matcher.start();
             prevSearchText = text;
             textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("highlight"));
+
+            textArea.moveTo(matcher.end());
+            textArea.requestFollowCaret();
         } else {
             pattern = null;
             lastMatchIdx = -1;
