@@ -40,6 +40,7 @@ public class TextEditorController {
     private TextField searchText;
 
     private int lastMatchIdx = -1;
+    private int lastMatchStartIdx = -1;
 
     Pattern pattern;
     Matcher matcher;
@@ -79,26 +80,30 @@ public class TextEditorController {
     @FXML
     public void findInFile(ActionEvent event) {
         findText(searchText.getText());
-
     }
 
     public void findText(String text) {
-        if (lastMatchIdx != -1) {
+        // TODO: Implement 'Find Previous' (search backwards)
+        if (lastMatchStartIdx != -1) {
             textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("normal"));
         }
         if (text.isEmpty()) {
             return;
         }
 
-        //System.out.println("findText: " + text);
         if (pattern == null || (!text.equals(prevSearchText))) {
-            lastMatchIdx = -1;
-            pattern = Pattern.compile(text, Pattern.LITERAL);
+            lastMatchStartIdx = -1;
+            pattern = Pattern.compile(text, Pattern.LITERAL | Pattern.CASE_INSENSITIVE);
         }
         matcher = pattern.matcher(textArea.getText());
+        int caretPos = textArea.getCaretPosition();
+        int searchIdx = lastMatchStartIdx + 1;
+        if ((caretPos < searchIdx) || (caretPos > searchIdx)) {
+            searchIdx = caretPos;
+        }
 
-        if (matcher.find(lastMatchIdx + 1) || matcher.find()) {
-            lastMatchIdx = matcher.start();
+        if (matcher.find(searchIdx) || matcher.find()) {
+            lastMatchStartIdx = matcher.start();
             prevSearchText = text;
             textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("highlight"));
 
@@ -106,7 +111,7 @@ public class TextEditorController {
             textArea.requestFollowCaret();
         } else {
             pattern = null;
-            lastMatchIdx = -1;
+            lastMatchStartIdx = -1;
             prevSearchText = "";
         }
     }
