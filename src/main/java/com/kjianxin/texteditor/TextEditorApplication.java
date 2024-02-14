@@ -57,6 +57,10 @@ public class TextEditorApplication extends Application {
         textEditorController.getSearchText().setOnKeyTyped(e -> {
             textEditorController.findText(textEditorController.getSearchText().getText());
         });
+
+        textEditorController.getTextArea().setOnMouseClicked(e -> {
+            textEditorController.clearHighlight();
+        });
     }
 
     public static void main(String[] args) {

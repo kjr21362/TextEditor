@@ -39,12 +39,17 @@ public class TextEditorController {
     @Setter
     private TextField searchText;
 
-    private int lastMatchIdx = -1;
+    @FXML
+    @Getter
+    @Setter
+    private TextField replaceText;
+
     private int lastMatchStartIdx = -1;
+    private boolean hasHighlight = false;
 
     Pattern pattern;
     Matcher matcher;
-    private String prevSearchText;
+    private String prevSearchText = "";
 
     private String prevTextAreaStr = "";
 
@@ -77,6 +82,30 @@ public class TextEditorController {
         }
     }
 
+    /**
+     * Replace keywords. Search the word and highlight it first (if not already highlighted),
+     * then replace.
+     *
+     * @param event event.
+     */
+    @FXML
+    public void replaceInFile(ActionEvent event) {
+        replaceWithText(replaceText.getText());
+    }
+
+    private void replaceWithText(String text) {
+        System.out.println("replace: " + text);
+        if (lastMatchStartIdx == -1 || !hasHighlight) {
+            findText(searchText.getText());
+        } else {
+            if (!text.isEmpty()) {
+                textArea.replaceText(matcher.start(), matcher.end(), text);
+                lastMatchStartIdx = matcher.end();
+                findText(searchText.getText());
+            }
+        }
+    }
+
     @FXML
     public void findInFile(ActionEvent event) {
         findText(searchText.getText());
@@ -84,9 +113,8 @@ public class TextEditorController {
 
     public void findText(String text) {
         // TODO: Implement 'Find Previous' (search backwards)
-        if (lastMatchStartIdx != -1) {
-            textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("normal"));
-        }
+        clearHighlight();
+
         if (text.isEmpty()) {
             return;
         }
@@ -105,7 +133,7 @@ public class TextEditorController {
         if (matcher.find(searchIdx) || matcher.find()) {
             lastMatchStartIdx = matcher.start();
             prevSearchText = text;
-            textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("highlight"));
+            setHighlight(matcher.start(), matcher.end());
 
             textArea.moveTo(matcher.end());
             textArea.requestFollowCaret();
@@ -113,6 +141,18 @@ public class TextEditorController {
             pattern = null;
             lastMatchStartIdx = -1;
             prevSearchText = "";
+        }
+    }
+
+    public void setHighlight(int from, int to) {
+        textArea.setStyle(from, to, Collections.singleton("highlight"));
+        hasHighlight = true;
+    }
+
+    public void clearHighlight() {
+        if (lastMatchStartIdx != -1) {
+            textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("normal"));
+            hasHighlight = false;
         }
     }
 
