@@ -28,6 +28,11 @@ public class TextEditorApplication extends Application {
         textEditorController.setStage(stage);
         textEditorController.getTextArea().setParagraphGraphicFactory(LineNumberFactory.get(textEditorController.getTextArea()));
 
+        textEditorController.getFindBar().setVisible(false);
+        textEditorController.getReplaceBar().setVisible(false);
+        textEditorController.getReplaceBar().managedProperty().bind(textEditorController.getReplaceBar().visibleProperty());
+        textEditorController.getFindBar().managedProperty().bind(textEditorController.getFindBar().visibleProperty());
+
         stage.setTitle("untitled");
         stage.setScene(scene);
         stage.show();

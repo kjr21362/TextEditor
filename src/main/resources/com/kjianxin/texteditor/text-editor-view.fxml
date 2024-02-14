@@ -39,7 +39,8 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Find">
               <items>
-                <MenuItem mnemonicParsing="false" text="Find" />
+                <MenuItem mnemonicParsing="false" onAction="#showFindBar" text="Find" />
+                  <MenuItem mnemonicParsing="false" onAction="#showReplaceBar" text="Replace" />
               </items>
             </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -53,26 +54,36 @@
    <bottom>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <HBox>
+            <HBox id="findBar" fx:id="findBar">
                <children>
                   <Button mnemonicParsing="false" text="Button" />
                   <Button mnemonicParsing="false" text="Button" />
-                  <TextField fx:id="searchText" alignment="TOP_LEFT" prefHeight="24.0" prefWidth="619.0">
+                  <TextField fx:id="searchText" alignment="TOP_LEFT" prefHeight="26.0" prefWidth="603.0">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
                   </TextField>
                   <Button mnemonicParsing="false" onAction="#findInFile" text="Find" />
+                  <Button cancelButton="true" mnemonicParsing="false" onAction="#hideFindBar" text="x">
+                     <HBox.margin>
+                        <Insets left="220.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
             </HBox>
-            <HBox prefHeight="0.0" prefWidth="1000.0">
+            <HBox id="replaceBar" fx:id="replaceBar" prefHeight="0.0" prefWidth="1000.0">
                <children>
-                  <TextField fx:id="replaceText" prefHeight="26.0" prefWidth="619.0">
+                  <TextField fx:id="replaceText" prefHeight="26.0" prefWidth="603.0">
                      <HBox.margin>
                         <Insets left="107.0" />
                      </HBox.margin>
                   </TextField>
                   <Button mnemonicParsing="false" onAction="#replaceInFile" text="Replace" />
+                  <Button cancelButton="true" mnemonicParsing="false" onAction="#hideReplaceBar" text="x">
+                     <HBox.margin>
+                        <Insets left="200.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
             </HBox>
          </children>

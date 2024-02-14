@@ -18,6 +18,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -38,6 +39,16 @@ public class TextEditorController {
     @Getter
     @Setter
     private TextField searchText;
+
+    @FXML
+    @Getter
+    @Setter
+    private HBox findBar;
+
+    @FXML
+    @Getter
+    @Setter
+    private HBox replaceBar;
 
     @FXML
     @Getter
@@ -72,8 +83,8 @@ public class TextEditorController {
     @FXML
     public void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters()
-            .add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
+        //fileChooser.getExtensionFilters()
+        //    .add(new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"));
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
         openedFile = fileChooser.showOpenDialog(null);
@@ -104,6 +115,28 @@ public class TextEditorController {
                 findText(searchText.getText());
             }
         }
+    }
+
+    @FXML
+    public void showFindBar(ActionEvent event) {
+        findBar.setVisible(true);
+    }
+
+    @FXML
+    public void hideFindBar(ActionEvent event) {
+        findBar.setVisible(false);
+    }
+
+    @FXML
+    public void showReplaceBar(ActionEvent event) {
+        // find bar is required to find keyword for replacing
+        findBar.setVisible(true);
+        replaceBar.setVisible(true);
+    }
+
+    @FXML
+    public void hideReplaceBar(ActionEvent event) {
+        replaceBar.setVisible(false);
     }
 
     @FXML
