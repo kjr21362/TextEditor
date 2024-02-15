@@ -1,0 +1,32 @@
+.styled-text-area .keyword {
+    -fx-fill: pink;
+    -fx-font-weight: bold;
+}
+.styled-text-area .semicolon {
+    -fx-font-weight: bold;
+}
+.styled-text-area .paren {
+    -fx-fill: white;
+    -fx-font-weight: bold;
+}
+.styled-text-area .bracket {
+    -fx-fill: firebrick;
+    -fx-font-weight: bold;
+}
+.styled-text-area .brace {
+    -fx-fill: white;
+    -fx-font-weight: bold;
+}
+.styled-text-area .string {
+    -fx-fill: darkseagreen;
+}
+
+.styled-text-area .comment {
+	-fx-fill: grey;
+	-fx-font-weight: bold;
+}
+
+/*
+.styled-text-area .paragraph-box:has-caret {
+    -fx-background-color: #f2f9fc;
+}*/

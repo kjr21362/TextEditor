@@ -21,17 +21,23 @@ public class TextEditorApplication extends Application {
         FXMLLoader fxmlLoader =
             new FXMLLoader(TextEditorApplication.class.getResource("text-editor-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
-        scene.getStylesheets().add(TextEditorApplication.class.getResource("textarea.css").toExternalForm());
+        scene.getStylesheets()
+            .add(TextEditorApplication.class.getResource("textarea.css").toExternalForm());
+        scene.getStylesheets()
+            .add(TextEditorApplication.class.getResource("java-highlights.css").toExternalForm());
         if (textEditorController == null) {
             textEditorController = fxmlLoader.getController();
         }
         textEditorController.setStage(stage);
-        textEditorController.getTextArea().setParagraphGraphicFactory(LineNumberFactory.get(textEditorController.getTextArea()));
+        textEditorController.getTextArea()
+            .setParagraphGraphicFactory(LineNumberFactory.get(textEditorController.getTextArea()));
 
         textEditorController.getFindBar().setVisible(false);
         textEditorController.getReplaceBar().setVisible(false);
-        textEditorController.getReplaceBar().managedProperty().bind(textEditorController.getReplaceBar().visibleProperty());
-        textEditorController.getFindBar().managedProperty().bind(textEditorController.getFindBar().visibleProperty());
+        textEditorController.getReplaceBar().managedProperty()
+            .bind(textEditorController.getReplaceBar().visibleProperty());
+        textEditorController.getFindBar().managedProperty()
+            .bind(textEditorController.getFindBar().visibleProperty());
 
         stage.setTitle("untitled");
         stage.setScene(scene);
@@ -70,5 +76,10 @@ public class TextEditorApplication extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    @Override
+    public void stop() {
+        textEditorController.getKeywordHighlightExecutor().shutdown();
     }
 }

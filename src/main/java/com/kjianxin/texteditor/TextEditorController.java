@@ -1,5 +1,7 @@
 package com.kjianxin.texteditor;
 
+import static com.kjianxin.texteditor.JavaKeywordHighlighter.computeHighlighting;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,8 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +31,9 @@ import javafx.util.Duration;
 import lombok.Getter;
 import lombok.Setter;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.reactfx.EventStream;
+import org.reactfx.Subscription;
 
 /**
  * TextEditorController. To add more details.
@@ -57,6 +66,13 @@ public class TextEditorController {
 
     private int lastMatchStartIdx = -1;
     private boolean hasHighlight = false;
+
+    @Getter
+    private ExecutorService keywordHighlightExecutor = Executors.newSingleThreadExecutor();
+
+    private EventStream<StyleSpans<Collection<String>>> keywordHighlightEventStream;
+
+    private Subscription keywordHighlightSubscription;
 
     Pattern pattern;
     Matcher matcher;
@@ -227,6 +243,29 @@ public class TextEditorController {
     private void loadFile(File fileToOpen) {
         Task<List<String>> loadFileTask = fileLoaderTask(fileToOpen);
         loadFileTask.run();
+
+        if ("java".equals(getFileExtension(openedFile).get())) {
+            keywordHighlightEventStream = textArea.multiPlainChanges()
+                .successionEnds(java.time.Duration.ofMillis(100))
+                .retainLatestUntilLater(keywordHighlightExecutor)
+                .supplyTask(this::computeHighlightingAsync)
+                .awaitLatest(textArea.multiPlainChanges())
+                .filterMap(t -> {
+                    if (t.isSuccess()) {
+                        return Optional.of(t.get());
+                    } else {
+                        t.getFailure().printStackTrace();
+                        return Optional.empty();
+                    }
+                });
+
+            keywordHighlightSubscription =
+                keywordHighlightEventStream.subscribe(this::applyHighlighting);
+        } else {
+            if (keywordHighlightSubscription != null) {
+                keywordHighlightSubscription.unsubscribe();
+            }
+        }
     }
 
     private Task<List<String>> fileLoaderTask(File fileToOpen) {
@@ -336,5 +375,28 @@ public class TextEditorController {
             }
         });
         scheduledService.start();
+    }
+
+    public Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
+        String text = textArea.getText();
+        Task<StyleSpans<Collection<String>>> task = new Task<>() {
+            @Override
+            protected StyleSpans<Collection<String>> call() {
+                return computeHighlighting(text);
+            }
+        };
+        keywordHighlightExecutor.execute(task);
+        return task;
+    }
+
+    private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
+        textArea.setStyleSpans(0, highlighting);
+    }
+
+    public Optional<String> getFileExtension(File file) {
+        String name = file.getName();
+        return Optional.ofNullable(name)
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(name.lastIndexOf(".") + 1));
     }
 }
