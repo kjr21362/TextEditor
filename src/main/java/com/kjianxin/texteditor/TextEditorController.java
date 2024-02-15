@@ -91,6 +91,14 @@ public class TextEditorController {
 
     private FileTime lastModifiedTime;
 
+    @FXML
+    public void newFile(ActionEvent event) {
+        textArea.clear();
+        lastMatchStartIdx = -1;
+        setStageTitle("untitled");
+        openedFile = null;
+    }
+
     /**
      * Open a file in the background and show the content in the text area.
      *
@@ -227,7 +235,7 @@ public class TextEditorController {
         }
         if (openedFile != null) {
             try {
-                setStageTitle(openedFile);
+                setStageTitle(openedFile.getName());
 
                 FileWriter fileWriter = new FileWriter(openedFile);
                 fileWriter.write(textArea.getText());
@@ -307,7 +315,7 @@ public class TextEditorController {
 
             prevTextAreaStr = textArea.getText();
 
-            setStageTitle(fileToOpen);
+            setStageTitle(fileToOpen.getName());
             openedFile = fileToOpen;
 
             lastModifiedTime = getFileLastModifiedTime(fileToOpen);
@@ -347,8 +355,8 @@ public class TextEditorController {
         return !prevTextAreaStr.equals(textArea.getText());
     }
 
-    private void setStageTitle(File openedFile) {
-        stage.setTitle(openedFile.getName());
+    private void setStageTitle(String title) {
+        stage.setTitle(title);
     }
 
     private ScheduledService<Boolean> createFileModifiedCheckService(File file) {
