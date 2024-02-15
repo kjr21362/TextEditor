@@ -201,6 +201,7 @@ public class TextEditorController {
     public void clearHighlight() {
         if (lastMatchStartIdx != -1) {
             textArea.setStyle(matcher.start(), matcher.end(), Collections.singleton("normal"));
+            applyHighlighting(computeHighlighting(textArea.getText()));
             hasHighlight = false;
         }
     }
@@ -244,7 +245,7 @@ public class TextEditorController {
         Task<List<String>> loadFileTask = fileLoaderTask(fileToOpen);
         loadFileTask.run();
 
-        if ("java".equals(getFileExtension(openedFile).get())) {
+        if (keywordHighlightSupported()) {
             keywordHighlightEventStream = textArea.multiPlainChanges()
                 .successionEnds(java.time.Duration.ofMillis(100))
                 .retainLatestUntilLater(keywordHighlightExecutor)
@@ -266,6 +267,10 @@ public class TextEditorController {
                 keywordHighlightSubscription.unsubscribe();
             }
         }
+    }
+
+    private boolean keywordHighlightSupported() {
+        return "java".equals(getFileExtension(openedFile).get());
     }
 
     private Task<List<String>> fileLoaderTask(File fileToOpen) {
