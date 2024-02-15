@@ -22,6 +22,12 @@ public class JavaKeywordHighlighter {
         "transient", "try", "void", "volatile", "while"
     };
 
+    public static final String[] OPERATORS = new String[] {
+        "\\+", "-", "\\*", "/", "%", "\\+\\+", "--", "=", "\\+=", "-=", "\\*=", "/=", "%=",
+        "&=", "\\|=", "\\^=", ">>=", "<<=", "&&", "\\|\\|", "!", "==", "!=", ">", "<",
+        ">=", "<="
+    };
+
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
     private static final String PAREN_PATTERN = "\\(|\\)";
     private static final String BRACE_PATTERN = "\\{|\\}";
@@ -29,6 +35,8 @@ public class JavaKeywordHighlighter {
     private static final String SEMICOLON_PATTERN = "\\;";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+    private static final String ANNOTATION_PATTERN = "@[A-Za-z]+";
+    public static final String OPERATOR_PATTERN = String.join("|", OPERATORS);
 
     private static final Pattern PATTERN = Pattern.compile(
         "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
@@ -38,6 +46,8 @@ public class JavaKeywordHighlighter {
             + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"
             + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
+            + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"
+            + "|(?<OPERATOR>" + OPERATOR_PATTERN + ")"
     );
 
     public static StyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -52,9 +62,11 @@ public class JavaKeywordHighlighter {
                         matcher.group("BRACE") != null ? "brace" :
                             matcher.group("BRACKET") != null ? "bracket" :
                                 matcher.group("SEMICOLON") != null ? "semicolon" :
-                                    matcher.group("STRING") != null ? "string" :
-                                        matcher.group("COMMENT") != null ? "comment" :
-                                            null; /* never happens */
+                                    matcher.group("OPERATOR") != null ? "operator" :
+                                        matcher.group("STRING") != null ? "string" :
+                                            matcher.group("COMMENT") != null ? "comment" :
+                                                matcher.group("ANNOTATION") != null ? "annotation" :
+                                                    null; /* never happens */
             assert styleClass != null;
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
             spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
